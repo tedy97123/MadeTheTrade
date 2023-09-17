@@ -7,6 +7,8 @@ import com.tedy.Banking.Repository.SecuritiesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SecuritiesServiceImplement implements SecuritiesService {
 
@@ -57,6 +59,8 @@ public class SecuritiesServiceImplement implements SecuritiesService {
                .max_supply(savedStock.getMax_supply())
                .build();
     }
+
+
 
 
 }

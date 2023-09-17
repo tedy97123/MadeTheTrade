@@ -21,4 +21,6 @@ public class UserController {
     public BankResponse createAccount(@RequestBody UserRequest userRequest){
             return userService.createAccount(userRequest);
     }
+    
+    
 }
