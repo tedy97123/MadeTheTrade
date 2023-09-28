@@ -10,89 +10,74 @@ import com.tedy.Banking.Utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.Date;
-
-import static com.tedy.Banking.Utils.AccountUtils.ACCOUNT_CREATION_MESSAGE;
-import static com.tedy.Banking.Utils.AccountUtils.ACCOUNT_CREATION_SUCCESS;
-
 @Service
-public class UserServiceImplement implements UserService{
+public class UserServiceImplement implements UserService {
+
+    private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    EmailService emailService;
+    public UserServiceImplement(UserRepository userRepository, EmailService emailService) {
+        this.userRepository = userRepository;
+        this.emailService = emailService;
+    }
 
     @Override
-    public BankResponse createAccount(UserRequest userRequest)
-    {
+    public BankResponse createAccount(UserRequest userRequest) {
 
-        /**
-         * validation for userObject
-         */
-        if(userRepository.existsByEmail(userRequest.getEmail()))
-        {
-            return
-                    BankResponse.builder()
-                             .responseCode(AccountUtils.ACCOUNT_EXISTS_CODE)
-                             .responseMessage(AccountUtils.ACCOUNT_EXISTS_MESSAGE)
-                             .accountInfo(null)
+        // Check if email already exists
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_EXISTS_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_EXISTS_MESSAGE)
+                    .accountInfo(null)
                     .build();
-        };
+        }
 
-        /**
-         * Creating an account - saving a new user into the DB
-         * instantiates a new user
-         * Builder Pattern
-         */
-
+        // Create and save a new user
         User newUser = User.builder()
-                    //.userName(userRequest.getUserName())
-                    .firstName(userRequest.getFirstName())
-                    .lastName(userRequest.getLastName())
-                    .email(userRequest.getEmail())
-                   // .phoneNumber(userRequest.getPhoneNumber())
-                   // .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
-                    .gender(userRequest.getGender())
-                    //.country(userRequest.getCountry())
-                    //.state(userRequest.getState())
-                    .address(userRequest.getAddress())
-                    .birthDay(userRequest.getBirthDay())
-                    .password(userRequest.getPassword())
-                    //.accountNumber(AccountUtils.generateAccountNumber())
-                    //.accountBalance(BigDecimal.ZERO)
-                    .status("ACTIVE")
-                    .build();
+                .firstName(userRequest.getFirstName())
+                .lastName(userRequest.getLastName())
+                .email(userRequest.getEmail())
+                .gender(userRequest.getGender())
+                .address(userRequest.getAddress())
+                .birthDay(userRequest.getBirthDay())
+                .password(userRequest.getPassword())
+                .status("ACTIVE")
+                .build();
 
         User savedUser = userRepository.save(newUser);
-        //Send email alert
+
+        // Send account creation email
+        sendAccountCreationEmail(savedUser);
+
+        return BankResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
+                .responseMessage(AccountUtils.ACCOUNT_CREATION_MESSAGE)
+                .accountInfo(buildAccountInfo(savedUser))
+                .build();
+    }
+
+    private void sendAccountCreationEmail(User savedUser) {
         EmailDetails emailDetails = EmailDetails.builder()
                 .recipient(savedUser.getEmail())
                 .subject("Account Creation!")
                 .messageBody(
                         "Congratulations on creating a new account!" +
-                        " Your account has been successfully created! " +
-                        "Your welcome to enjoy our applications features.\n" +
+                                " Your account has been successfully created! " +
+                                "Your welcome to enjoy our applications features.\n" +
                                 "Your Account Information: \n" +
-                        "Account Name:" + savedUser.getFirstName() + ""
-                                + savedUser.getLastName() + " \n" +
-                        "Account Number:" + savedUser.getAccountNumber())
+                                "Account Name: " + savedUser.getFirstName() + " " + savedUser.getLastName() + "\n" +
+                                "Account Number: " + savedUser.getAccountNumber())
                 .build();
         emailService.sendEmailAlert(emailDetails);
-
-        return BankResponse.builder()
-                .responseCode(ACCOUNT_CREATION_SUCCESS)
-                .responseMessage(ACCOUNT_CREATION_MESSAGE)
-                .accountInfo(AccountInfo.builder()
-                                .accountBalance(savedUser.getAccountBalance())
-                                .accountNumber(savedUser.getAccountNumber())
-                               .accountName(savedUser.getFirstName() + savedUser.getLastName())
-                . build()
-                )
-                .build();
     }
 
-
+    private AccountInfo buildAccountInfo(User savedUser) {
+        return AccountInfo.builder()
+                .accountBalance(savedUser.getAccountBalance())
+                .accountNumber(savedUser.getAccountNumber())
+                .accountName(savedUser.getFirstName() + " " + savedUser.getLastName())
+                .build();
+    }
 }
