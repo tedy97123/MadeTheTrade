@@ -1,0 +1,20 @@
+logging:
+  level: INFO
+  loggers:
+    com.plaid: DEBUG
+
+plaid_client_id: 650d232d9bb271001a704222
+plaid_secret: ce698d2edc99a8f46700a2660c6019
+plaid_products: ${PLAID_PRODUCTS}
+plaid_country_codes: ${PLAID_COUNTRY_CODES}
+plaid_redirect_uri: ${PLAID_REDIRECT_URI:-""}
+plaid_env: ${PLAID_ENV:-sandbox}
+
+server:
+  application_connectors:
+    - type: http
+      port: 8000
+  admin_connectors:
+    - type: http
+      port: 8001
+  rootPath: '/api'

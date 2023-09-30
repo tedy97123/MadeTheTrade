@@ -5,10 +5,7 @@ import com.tedy.Banking.DTO.BankResponse;
 import com.tedy.Banking.DTO.UserRequest;
 import com.tedy.Banking.Services.impl.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
@@ -21,6 +18,9 @@ public class UserController {
     public BankResponse createAccount(@RequestBody UserRequest userRequest){
             return userService.createAccount(userRequest);
     }
+
+
+
     
     
 }
