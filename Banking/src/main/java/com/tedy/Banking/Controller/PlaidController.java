@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/plaid")
 public class PlaidController {
@@ -38,7 +40,11 @@ public class PlaidController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
+    @PostMapping("/hello")
+    public String helloworld() {
+        return "Hello";
 
+    }
     @PostMapping("/get-balances")
     public ResponseEntity<?> getBalances(@RequestParam String accessToken) {
         try {
@@ -90,4 +96,56 @@ public class PlaidController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
+
+    @GetMapping("/get-holdings")
+    public ResponseEntity<?> getHoldings(String accessToken) {
+        return handleResponse(plaidClient.getHoldings(accessToken));
+    }
+
+    @GetMapping("/get-liabilities")
+    public ResponseEntity<?> getLiabilities (String accessToken) {
+        return handleResponse(plaidClient.getLiabilities(accessToken));
+    }
+
+    @GetMapping("/get-item")
+    public ResponseEntity<?> getItem(String accessToken) {
+        return handleResponse(plaidClient.getItem(accessToken));
+    }
+
+    @GetMapping("/get-accounts")
+    public ResponseEntity<?> getAccounts(String accessToken) {
+        return handleResponse(plaidClient.getAccounts(accessToken));
+    }
+
+    @GetMapping("/get-assets")
+    public ResponseEntity<?> getAssets(String accessToken) {
+        return handleResponse(plaidClient.getAssets(accessToken));
+    }
+
+    @GetMapping("/get-transfer")
+    public ResponseEntity<?> getTransfer(String accessToken) {
+        return handleResponse(plaidClient.getTransfer(accessToken));
+    }
+
+    @GetMapping("/get-payment")
+    public ResponseEntity<?> getPayment(String accessToken) {
+        return handleResponse(plaidClient.getPayment(accessToken));
+    }
+
+    @GetMapping("/get-income-verification-paystubs")
+    public ResponseEntity<?> getIncomeVerificationPaystubs(String accessToken) {
+        return handleResponse(plaidClient.getIncomeVerificationPaystubs(accessToken));
+    }
+
+    private ResponseEntity<?> handleResponse(ResponseEntity<Map<String, Object>> responseEntity) {
+        if (responseEntity != null && responseEntity.getStatusCode() == HttpStatus.OK) {
+            return ResponseEntity.ok(responseEntity.getBody());
+        } else {
+            // This is a general way to handle any potential error response. Adjust as needed.
+            return (responseEntity != null)
+                    ? ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody())
+                    : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve data.");
+        }
+    }
+
 }
